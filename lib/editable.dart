@@ -82,11 +82,13 @@ class Editable extends StatefulWidget {
       this.thStyle,
       this.thVertAlignment = CrossAxisAlignment.center,
       this.showCreateButton = false,
+      this.showCreateButtonInActionsColumn = false,
       this.createButtonAlign = CrossAxisAlignment.start,
       this.createButtonIcon,
       this.createButtonColor,
       this.createButtonShape,
       this.createButtonLabel,
+      this.createButtonBoxShadow,
       this.stripeColor1 = Colors.white,
       this.stripeColor2 = Colors.black12,
       this.zebraStripe = false,
@@ -252,6 +254,9 @@ class Editable extends StatefulWidget {
   /// displays a button that adds a new row onPressed
   final bool showCreateButton;
 
+  ///Show create button in action Column
+  final bool showCreateButtonInActionsColumn;
+
   /// Aligns the button for adding new rows
   final CrossAxisAlignment createButtonAlign;
 
@@ -260,6 +265,9 @@ class Editable extends StatefulWidget {
 
   /// Color for the create new row button
   final Color? createButtonColor;
+
+  /// BoxShadow for the create  button
+  final List<BoxShadow>? createButtonBoxShadow;
 
   /// border shape of the create new row button
   ///
@@ -356,7 +364,7 @@ class EditableState extends State<Editable> {
             ),
           ),
           Visibility(
-            visible: true, //widget.showDeleteIcon,
+            visible: widget.showDeleteIcon,
             child: IconButton(
               padding: EdgeInsets.only(right: widget.tdPaddingRight),
               hoverColor: Colors.transparent,
@@ -382,8 +390,14 @@ class EditableState extends State<Editable> {
     List<Widget> _tableHeaders() {
       return List<Widget>.generate(columnCount! + 1, (index) {
         return columnCount! + 1 == (index + 1)
-            ? iconColumn(widget.showSaveIcon, widget.thPaddingTop,
-                widget.thPaddingBottom)
+            ? widget.showCreateButtonInActionsColumn
+                ? createButton()
+                : iconColumn(
+                    widget.showSaveIcon ||
+                        widget.showDeleteIcon ||
+                        widget.showCreateButtonInActionsColumn,
+                    widget.thPaddingTop,
+                    widget.thPaddingBottom)
             : THeader(
                 widthRatio: columns![index]['widthFactor'] != null
                     ? columns![index]['widthFactor'].toDouble()
@@ -469,31 +483,35 @@ class EditableState extends State<Editable> {
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child:
-              Column(crossAxisAlignment: widget.createButtonAlign, children: [
-            //Table Header
-            createButton(),
-            Container(
-              padding: EdgeInsets.only(bottom: widget.thPaddingBottom),
-              decoration: BoxDecoration(
+          child: Column(
+            crossAxisAlignment: widget.createButtonAlign,
+            children: [
+              //Table Header
+              if (!widget.showCreateButtonInActionsColumn) createButton(),
+              Container(
+                padding: EdgeInsets.only(bottom: widget.thPaddingBottom),
+                decoration: BoxDecoration(
                   border: Border(
-                      bottom: BorderSide(
-                          color: widget.borderColor,
-                          width: widget.borderWidth))),
-              child: Row(
+                    bottom: BorderSide(
+                        color: widget.borderColor, width: widget.borderWidth),
+                  ),
+                ),
+                child: Row(
                   crossAxisAlignment: widget.thVertAlignment,
                   mainAxisSize: MainAxisSize.min,
-                  children: _tableHeaders()),
-            ),
-
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: _tableRows(),
+                  children: _tableHeaders(),
                 ),
               ),
-            )
-          ]),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: _tableRows(),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -504,7 +522,8 @@ class EditableState extends State<Editable> {
     return Visibility(
       visible: widget.showCreateButton,
       child: Padding(
-        padding: EdgeInsets.only(left: 4.0, bottom: 4),
+        padding:
+            EdgeInsets.only(left: widget.tdPaddingLeft, bottom: 2, right: 8.0),
         child: InkWell(
           onTap: () {
             rows = addOneRow(columns, rows);
@@ -515,9 +534,7 @@ class EditableState extends State<Editable> {
             padding: EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: widget.createButtonColor ?? Colors.white,
-              boxShadow: [
-                BoxShadow(blurRadius: 2, color: Colors.grey.shade400)
-              ],
+              boxShadow: widget.createButtonBoxShadow,
               borderRadius: BorderRadius.circular(10),
               shape: BoxShape.rectangle,
             ),

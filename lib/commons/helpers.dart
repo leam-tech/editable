@@ -34,9 +34,9 @@ addOneRow(columns, rows) {
 }
 
 ///Create an empty column for saveIcon
-Widget iconColumn(showSaveIcon, thPaddingTop, thPaddingBottom) {
+Widget iconColumn(showColumn, thPaddingTop, thPaddingBottom) {
   return Visibility(
-    visible: showSaveIcon,
+    visible: showColumn,
     child: Flexible(
       fit: FlexFit.loose,
       child: Padding(
