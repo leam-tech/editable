@@ -366,65 +366,76 @@ class EditableState extends State<Editable> {
 
     /// Builds saveIcon widget
     Widget _actionsButtons(index) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Visibility(
-            visible: widget.showRowInfoIcon,
-            child: IconButton(
-              padding: EdgeInsets.only(right: widget.tdPaddingRight),
-              hoverColor: Colors.transparent,
-              icon: Icon(
-                widget.rowInfoIcon,
-                color: widget.rowInfoIconColor,
-                size: widget.rowInfoIconSize,
+      return Container(
+        height: widget.trHeight,
+        decoration: BoxDecoration(
+            color: !widget.zebraStripe
+                ? null
+                : (index % 2 == 1.0
+                    ? widget.stripeColor2
+                    : widget.stripeColor1),
+            border: Border.all(
+                color: widget.borderColor, width: widget.borderWidth)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Visibility(
+              visible: widget.showRowInfoIcon,
+              child: IconButton(
+                padding: EdgeInsets.only(right: widget.tdPaddingRight),
+                hoverColor: Colors.transparent,
+                icon: Icon(
+                  widget.rowInfoIcon,
+                  color: widget.rowInfoIconColor,
+                  size: widget.rowInfoIconSize,
+                ),
+                onPressed: () {
+                  widget.onRowInfo!(index);
+                },
               ),
-              onPressed: () {
-                widget.onRowInfo!(index);
-              },
             ),
-          ),
-          Visibility(
-            visible: widget.showSaveIcon,
-            child: IconButton(
-              padding: EdgeInsets.only(right: widget.tdPaddingRight),
-              hoverColor: Colors.transparent,
-              icon: Icon(
-                widget.saveIcon,
-                color: widget.saveIconColor,
-                size: widget.saveIconSize,
+            Visibility(
+              visible: widget.showSaveIcon,
+              child: IconButton(
+                padding: EdgeInsets.only(right: widget.tdPaddingRight),
+                hoverColor: Colors.transparent,
+                icon: Icon(
+                  widget.saveIcon,
+                  color: widget.saveIconColor,
+                  size: widget.saveIconSize,
+                ),
+                onPressed: () {
+                  int rowIndex = editedRows.indexWhere(
+                      (element) => element['row'] == index ? true : false);
+                  if (rowIndex != -1) {
+                    widget.onRowSaved!(editedRows[rowIndex]);
+                  } else {
+                    widget.onRowSaved!('no edit');
+                  }
+                },
               ),
-              onPressed: () {
-                int rowIndex = editedRows.indexWhere(
-                    (element) => element['row'] == index ? true : false);
-                if (rowIndex != -1) {
-                  widget.onRowSaved!(editedRows[rowIndex]);
-                } else {
-                  widget.onRowSaved!('no edit');
-                }
-              },
             ),
-          ),
-          Visibility(
-            visible: widget.showDeleteIcon,
-            child: IconButton(
-              padding: EdgeInsets.only(right: widget.tdPaddingRight),
-              hoverColor: Colors.transparent,
-              icon: Icon(
-                widget.deleteIcon,
-                color: widget.deleteIconColor,
-                size: widget.deleteIconSize,
+            Visibility(
+              visible: widget.showDeleteIcon,
+              child: IconButton(
+                padding: EdgeInsets.only(right: widget.tdPaddingRight),
+                hoverColor: Colors.transparent,
+                icon: Icon(
+                  widget.deleteIcon,
+                  color: widget.deleteIconColor,
+                  size: widget.deleteIconSize,
+                ),
+                onPressed: () {
+                  setState(() {
+                    rows!.removeAt(index);
+                    rowCount = rowCount! - 1;
+                  });
+                  widget.onRowDeleted!(index);
+                },
               ),
-              onPressed: () {
-                setState(() {
-                  rows!.removeAt(index);
-                  rowCount = rowCount! - 1;
-                });
-                widget.onRowDeleted!(index);
-              },
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -565,7 +576,7 @@ class EditableState extends State<Editable> {
       visible: widget.showCreateButton,
       child: Padding(
         padding:
-            EdgeInsets.only(left: widget.tdPaddingLeft, bottom: 2, right: 8.0),
+            EdgeInsets.only(left: 8.0, bottom: 2, right: 8.0),
         child: InkWell(
           onTap: () {
             rows = addOneRow(columns, rows);
