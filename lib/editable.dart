@@ -365,7 +365,13 @@ class EditableState extends State<Editable> {
                 color: widget.deleteIconColor,
                 size: widget.deleteIconSize,
               ),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  rows!.removeAt(index);
+                  rowCount = rowCount! - 1;
+                });
+                widget.onRowDeleted!(index);
+              },
             ),
           ),
         ],
@@ -414,6 +420,7 @@ class EditableState extends State<Editable> {
             return columnCount! + 1 == (rowIndex + 1)
                 ? _actionsButtons(index)
                 : RowBuilder(
+                    key: UniqueKey(),
                     index: index,
                     col: ckeys[rowIndex],
                     trHeight: widget.trHeight,
