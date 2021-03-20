@@ -52,6 +52,7 @@ class Editable extends StatefulWidget {
       this.onSubmitted,
       this.onRowSaved,
       this.onRowDeleted,
+      this.onRowInfo,
       this.columnCount = 0,
       this.rowCount = 0,
       this.borderColor = Colors.grey,
@@ -75,6 +76,10 @@ class Editable extends StatefulWidget {
       this.deleteIcon = Icons.delete_forever,
       this.deleteIconColor = Colors.red,
       this.deleteIconSize = 18,
+      this.showRowInfoIcon = false,
+      this.rowInfoIcon = Icons.info,
+      this.rowInfoIconColor = Colors.red,
+      this.rowInfoIconSize = 18,
       this.tdAlignment = TextAlign.start,
       this.tdStyle,
       this.tdEditableMaxLines = 1,
@@ -241,7 +246,7 @@ class Editable extends StatefulWidget {
   /// example:
   ///
   /// ```dart
-  /// deleteIcon : Icons.remove
+  /// deleteIcon : Icons.delete_forever
   /// ````
   final IconData deleteIcon;
 
@@ -250,6 +255,25 @@ class Editable extends StatefulWidget {
 
   /// Size for the deleteIcon
   final double deleteIconSize;
+
+  /// Toogles the row Info button,
+  /// if [true] displays an icon to get row ,
+  /// adds an addition column to the right
+  final bool showRowInfoIcon;
+
+  /// Icon for to get row data
+  /// example:
+  ///
+  /// ```dart
+  /// getRowIcon : Icons.remove
+  /// ````
+  final IconData rowInfoIcon;
+
+  /// Color for the rowInfo Icon
+  final Color rowInfoIconColor;
+
+  /// Size for the rowInfoIcon
+  final double rowInfoIconSize;
 
   /// displays a button that adds a new row onPressed
   final bool showCreateButton;
@@ -305,6 +329,9 @@ class Editable extends StatefulWidget {
   /// returns values if row is deleted.
   final ValueChanged<dynamic>? onRowDeleted;
 
+  /// [onRowInfo] callback is triggered when a [rowInfoButton] is pressed.
+  final ValueChanged<dynamic>? onRowInfo;
+
   @override
   EditableState createState() => EditableState(
       rows: this.rows,
@@ -342,6 +369,21 @@ class EditableState extends State<Editable> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Visibility(
+            visible: widget.showRowInfoIcon,
+            child: IconButton(
+              padding: EdgeInsets.only(right: widget.tdPaddingRight),
+              hoverColor: Colors.transparent,
+              icon: Icon(
+                widget.rowInfoIcon,
+                color: widget.rowInfoIconColor,
+                size: widget.rowInfoIconSize,
+              ),
+              onPressed: () {
+                widget.onRowInfo!(index);
+              },
+            ),
+          ),
           Visibility(
             visible: widget.showSaveIcon,
             child: IconButton(
