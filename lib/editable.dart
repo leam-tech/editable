@@ -51,6 +51,7 @@ class Editable extends StatefulWidget {
       this.columnRatio = 0.20,
       this.onSubmitted,
       this.onRowSaved,
+      this.onRowDeleted,
       this.columnCount = 0,
       this.rowCount = 0,
       this.borderColor = Colors.grey,
@@ -70,6 +71,10 @@ class Editable extends StatefulWidget {
       this.saveIcon = Icons.save,
       this.saveIconColor = Colors.black12,
       this.saveIconSize = 18,
+      this.showDeleteIcon = false,
+      this.deleteIcon = Icons.delete_forever,
+      this.deleteIconColor = Colors.red,
+      this.deleteIconSize = 18,
       this.tdAlignment = TextAlign.start,
       this.tdStyle,
       this.tdEditableMaxLines = 1,
@@ -225,6 +230,25 @@ class Editable extends StatefulWidget {
   /// Size for the saveIcon
   final double saveIconSize;
 
+  /// Toogles the delete button,
+  /// if [true] displays an icon to delete rows,
+  /// adds an addition column to the right
+  final bool showDeleteIcon;
+
+  /// Icon for to delete row data
+  /// example:
+  ///
+  /// ```dart
+  /// deleteIcon : Icons.remove
+  /// ````
+  final IconData deleteIcon;
+
+  /// Color for the delete Icon
+  final Color deleteIconColor;
+
+  /// Size for the deleteIcon
+  final double deleteIconSize;
+
   /// displays a button that adds a new row onPressed
   final bool showCreateButton;
 
@@ -269,6 +293,10 @@ class Editable extends StatefulWidget {
   /// returns only values if row is edited, otherwise returns a string ['no edit']
   final ValueChanged<dynamic>? onRowSaved;
 
+  /// [onRowDeleted] callback is triggered when a [deleteButton] is pressed.
+  /// returns values if row is deleted.
+  final ValueChanged<dynamic>? onRowDeleted;
+
   @override
   EditableState createState() => EditableState(
       rows: this.rows,
@@ -302,30 +330,45 @@ class EditableState extends State<Editable> {
     rows = rows ?? rowBlueprint(rowCount!, columns, rows);
 
     /// Builds saveIcon widget
-    Widget _saveIcon(index) {
-      return Flexible(
-        fit: FlexFit.loose,
-        child: Visibility(
-          visible: widget.showSaveIcon,
-          child: IconButton(
-            padding: EdgeInsets.only(right: widget.tdPaddingRight),
-            hoverColor: Colors.transparent,
-            icon: Icon(
-              widget.saveIcon,
-              color: widget.saveIconColor,
-              size: widget.saveIconSize,
+    Widget _actionsButtons(index) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Visibility(
+            visible: widget.showSaveIcon,
+            child: IconButton(
+              padding: EdgeInsets.only(right: widget.tdPaddingRight),
+              hoverColor: Colors.transparent,
+              icon: Icon(
+                widget.saveIcon,
+                color: widget.saveIconColor,
+                size: widget.saveIconSize,
+              ),
+              onPressed: () {
+                int rowIndex = editedRows.indexWhere(
+                    (element) => element['row'] == index ? true : false);
+                if (rowIndex != -1) {
+                  widget.onRowSaved!(editedRows[rowIndex]);
+                } else {
+                  widget.onRowSaved!('no edit');
+                }
+              },
             ),
-            onPressed: () {
-              int rowIndex = editedRows.indexWhere(
-                  (element) => element['row'] == index ? true : false);
-              if (rowIndex != -1) {
-                widget.onRowSaved!(editedRows[rowIndex]);
-              } else {
-                widget.onRowSaved!('no edit');
-              }
-            },
           ),
-        ),
+          Visibility(
+            visible: true, //widget.showDeleteIcon,
+            child: IconButton(
+              padding: EdgeInsets.only(right: widget.tdPaddingRight),
+              hoverColor: Colors.transparent,
+              icon: Icon(
+                widget.deleteIcon,
+                color: widget.deleteIconColor,
+                size: widget.deleteIconSize,
+              ),
+              onPressed: () {},
+            ),
+          ),
+        ],
       );
     }
 
@@ -369,7 +412,7 @@ class EditableState extends State<Editable> {
             });
             var list = rows![index];
             return columnCount! + 1 == (rowIndex + 1)
-                ? _saveIcon(index)
+                ? _actionsButtons(index)
                 : RowBuilder(
                     index: index,
                     col: ckeys[rowIndex],
